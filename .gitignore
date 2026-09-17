@@ -1,0 +1,8 @@
+/bin/
+/dist/
+/tmp/
+*.exe
+*.test
+coverage.out
+.env
+!.env.example

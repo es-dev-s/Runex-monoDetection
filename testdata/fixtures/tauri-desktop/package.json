@@ -1,0 +1,14 @@
+{
+  "name": "stremo-web",
+  "dependencies": {
+    "next": "16.3.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@tauri-apps/api": "2.11.3"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}
