@@ -152,18 +152,43 @@ func goEntrypoint(idx *index.Index, root string) (index.File, bool) {
 
 func entryScore(file index.File) int {
 	dir := file.Dir
+	score := 10
 	switch {
+	case goToolDir(dir):
+		score = 0
 	case dir == "cmd/server" || strings.HasSuffix(dir, "/cmd/server"):
-		return 100
+		score = 100
 	case dir == "cmd/api" || dir == "cmd/app" || dir == "cmd/http" || dir == "cmd/signaling":
-		return 90
+		score = 90
 	case strings.HasPrefix(dir, "cmd/"):
-		return 70
+		score = 70
 	case dir == "":
-		return 40
-	default:
-		return 10
+		score = 55
 	}
+	if goFileListens(file) {
+		score += 50
+	}
+	return score
+}
+
+func goToolDir(dir string) bool {
+	base := strings.ToLower(path.Base(dir))
+	switch base {
+	case "loadtest", "load-test", "seed", "seedleads", "migrate", "migration", "migrations",
+		"perfcheck", "bench", "benchmark", "tuneindexes", "tools", "tool", "cli", "gen", "generate":
+		return true
+	default:
+		return strings.Contains(base, "loadtest") || strings.Contains(base, "seed") || strings.HasPrefix(base, "perf")
+	}
+}
+
+func goFileListens(file index.File) bool {
+	data, err := index.ReadAbs(file.Abs, 64<<10)
+	if err != nil {
+		return false
+	}
+	text := string(data)
+	return strings.Contains(text, "ListenAndServe") || strings.Contains(text, "http.Server")
 }
 
 func goPackage(file index.File) string {
